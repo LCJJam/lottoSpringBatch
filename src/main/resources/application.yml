@@ -1,6 +1,21 @@
 spring:
   profiles:
     active: local
+---
+spring:
+  profiles: dev
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLInnoDBDialect
+    hibernate:
+      ddl-auto: none
+  datasource:
+    hikari:
+      jdbc-url: jdbc:h2:tcp://localhost:9092/./data/testdb;MODE=MYSQL
+#      jdbc-url: jdbc:h2:mem:testdb;MODE=MYSQL
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: sa
+      password: 1234
 
 ---
 spring:
@@ -9,7 +24,7 @@ spring:
     hikari:
       jdbc-url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
       username: sa
-      password:
+      password: 1234
       driver-class-name: org.h2.Driver
 ---
 spring:
@@ -21,8 +36,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: false
+      ddl-auto: none
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect

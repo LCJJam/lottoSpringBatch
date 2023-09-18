@@ -1,22 +1,24 @@
 package com.example.lottospringbatch.batch.config;
 
-import com.example.lottospringbatch.batch.ItemReader.WebCrawlingItemReader;
 import com.example.lottospringbatch.batch.entity.Game;
+import com.example.lottospringbatch.repository.GameRepository;
+import com.example.lottospringbatch.util.WebCrawler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.persistence.EntityManagerFactory;
+import java.util.Objects;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 @EnableBatchProcessing
 public class GetThisWeekWinningNumConfig {
     private static final String JOB_NAME = "getThisWeekWinningNumJob";
@@ -24,44 +26,28 @@ public class GetThisWeekWinningNumConfig {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final EntityManagerFactory entityManagerFactory;
 
-    public GetThisWeekWinningNumConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, EntityManagerFactory entityManagerFactory) {
-        this.jobBuilderFactory = jobBuilderFactory;
-        this.stepBuilderFactory = stepBuilderFactory;
-        this.entityManagerFactory = entityManagerFactory;
-    }
+    private final GameRepository gameRepository;
 
     @Bean(JOB_NAME)
     public Job job() {
         return jobBuilderFactory.get(JOB_NAME)
+                .preventRestart()
+                .incrementer(new RunIdIncrementer())
                 .start(step())
-                .on("*")
-                .end()
-                .end()
                 .build();
     }
 
     public Step step() {
 
         return stepBuilderFactory.get(STEP_NAME)
-                .<Game, Game>chunk(10000)
-                .reader(reader())
-                .writer(writer())
+                .allowStartIfComplete(true)
+                .tasklet((contribution, chunkContext) -> {
+                    Game game = WebCrawler.crawlDataFromWebsite("https://dhlottery.co.kr/gameResult.do?method=byWin");
+                    gameRepository.save(Objects.requireNonNull(game));
+                    return RepeatStatus.FINISHED;
+                })
                 .build();
     }
-
-    public WebCrawlingItemReader<? extends Game> reader() {
-        return new WebCrawlingItemReader<Game>( "https://dhlottery.co.kr/gameResult.do?method=byWin"); // 웹 사이트 URL 설정
-    }
-
-    @Bean
-    public ItemWriter<Game> writer() {
-        JpaItemWriter<Game> writer = new JpaItemWriter<>();
-        writer.setEntityManagerFactory(entityManagerFactory);
-        return writer;
-    }
-
-
 
 }

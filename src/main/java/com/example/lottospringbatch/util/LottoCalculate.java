@@ -1,6 +1,8 @@
 package com.example.lottospringbatch.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class LottoCalculate {
     public static long calculateWeekNumber() {
@@ -15,6 +17,21 @@ public class LottoCalculate {
         long weeksDifference = millisecondsDifference / (7 * 24 * 60 * 60 * 1000);
 
         return weeksDifference;
+    }
+
+    public static String drawDay(int round) {
+        Calendar startDate = Calendar.getInstance();
+        startDate.set(2002, Calendar.NOVEMBER, 30,21,0,0);
+
+        startDate.add(Calendar.WEEK_OF_YEAR,round);
+
+        // 현재 날짜를 얻습니다.
+        Date resultDate = startDate.getTime();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = dateFormat.format(resultDate);
+
+        return formattedDate;
     }
 
     public static int ScoringAndGrading (int[] gameArr , int BonusNum , int[] myBallArr){

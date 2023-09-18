@@ -3,10 +3,7 @@ package com.example.lottospringbatch.batch.entity;
 import com.example.lottospringbatch.batch.dto.MyGameDetailId;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -17,8 +14,19 @@ import javax.persistence.Table;
 @Table(name = "my_game_detail")
 public class MyGameDetail {
 
-    @EmbeddedId
-    private MyGameDetailId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "my_game_detail_id")
+    private long id;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private int round;
+
+    @Column(nullable = false)
+    private int gameNum;
 
     @Column(nullable = false)
     private int ballNum1;

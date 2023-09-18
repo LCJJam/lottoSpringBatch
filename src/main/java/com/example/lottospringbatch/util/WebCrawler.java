@@ -1,6 +1,7 @@
 package com.example.lottospringbatch.util;
 
 import com.example.lottospringbatch.batch.entity.Game;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,14 +9,17 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
+@Slf4j
 public class WebCrawler {
 
-    public static Game crawlDataFromWebsite(String url) throws IOException {
+    public static Game crawlDataFromWebsite(String url) {
         // 사이트 크롤링
         // https://dhlottery.co.kr/gameResult.do?method=byWin
 
         String round = null;
         Document document = null;
+
+        log.info("Call Url : {}" + url);
 
         try {
             document = Jsoup.connect(url).get(); // 웹 페이지에 연결하여 HTML 가져오기
@@ -24,16 +28,12 @@ public class WebCrawler {
             return null;
         }
 
-
         // 현재 라운드를 얻습니다.
         Element dwrNo = document.select("select").first();
         round = dwrNo.select("option").first().text();
         long weekNumber = LottoCalculate.calculateWeekNumber();
 
-        // 현재 라운드가 갱신되지 않으면 return
-        if(Long.parseLong(round) == weekNumber){
-            return null;
-        }
+        log.info("get Round:{} , getWeekNumber:{}, TF:{}",round,weekNumber,Long.parseLong(round) == weekNumber);
 
         // 원하는 테이블 선택하기 (여기서는 첫 번째 테이블 선택)
         Elements tdElements = document.select("table").first().select("td");
@@ -48,6 +48,7 @@ public class WebCrawler {
                 .ballNum5(Integer.parseInt(ballNums.get(4).text()))
                 .ballNum6(Integer.parseInt(ballNums.get(5).text()))
                 .bonusNum(Integer.parseInt(ballNums.get(6).text()))
+                .drwNoDate(LottoCalculate.drawDay(Integer.parseInt(round)))
                 .firstPrzwnerCo(StringUtils.deleteCommaStrToNum(tdElements.get(2).text()))
                 .firstAccumamnt(StringUtils.koreaWonToNum(tdElements.get(3).text()))
                 .secondPrzwnerCo(StringUtils.deleteCommaStrToNum(tdElements.get(8).text()))
