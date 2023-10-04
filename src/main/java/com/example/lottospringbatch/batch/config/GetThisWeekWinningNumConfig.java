@@ -32,7 +32,7 @@ public class GetThisWeekWinningNumConfig {
     @Bean(JOB_NAME)
     public Job job() {
         return jobBuilderFactory.get(JOB_NAME)
-                .preventRestart()
+//                .preventRestart()
                 .incrementer(new RunIdIncrementer())
                 .start(step())
                 .build();

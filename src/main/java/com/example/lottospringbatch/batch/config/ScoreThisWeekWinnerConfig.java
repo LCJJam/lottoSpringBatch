@@ -44,6 +44,7 @@ public class ScoreThisWeekWinnerConfig {
     @Bean(JOB_NAME)
     public Job job() {
         return jobBuilderFactory.get(JOB_NAME)
+//                .preventRestart()
                 .incrementer(new RunIdIncrementer())
                 .start(step())
                 .build();
